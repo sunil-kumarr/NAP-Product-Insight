@@ -5,10 +5,10 @@ Click==7.0
 cryptography==2.6.1
 entrypoints==0.3
 filelock==3.0.12
-Flask==1.1.1
+Flask
 Flask-Cors==3.0.8
 gdown==3.10.0
-gunicorn==20.0.4
+gunicorn
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.11.1
