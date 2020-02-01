@@ -19,7 +19,7 @@ with open(path) as fp:
     for product in fp.readlines():
         product_json.append(json.loads(product))
 df = pd.json_normalize(product_json)
-df['discounts'] = (df['price.regular_price.value']-df['price.offer_price.value'])/100.0
+df['discounts'] = ((df['price.regular_price.value'] - df['price.offer_price.value'])/df['price.regular_price.value'])*100
 
 
 def apply_filters(temp_df,filter):
@@ -41,11 +41,18 @@ def get_query_type1(filters):
     return jsonify({'discounted_products_list': ans['_id.$oid'].to_list()})
 
 
+def get_query_type2(filters):
+    ans = pd.DataFrame()
+    for filter in filters:
+        ans = apply_filters(ans,filter)
+    return jsonify({'discounted_products_count': int(ans.discounts.count()) ,'avg_discount': float(ans.discounts.mean())})
+
+
 def get_tasks_answer(request):
     if request.json['query_type'] == 'discounted_products_list':
          return get_query_type1(request.json['filters'])
-    # elif request.query_type == 'discounted_products_count|avg_discount':
-    #      return get_query_type2(request.filters)
+    elif request.json['query_type'] == 'discounted_products_count|avg_discount':
+         return get_query_type2(request.json['filters'])
     # elif request.query_type == 'expensive_list':
     #      return get_query_type3(request.filters)
     # elif request.query_type == 'competition_discount_diff_list':
@@ -64,10 +71,10 @@ def server_error(error):
 
 @app.route("/greendeck/discounts/", methods=['GET'])
 def get_json_complete():
-    return df.to_json(orient='columns')
+    return df['discounts'].to_json(orient='columns')
 
 
-@app.route('/greendeck/task1', methods=['POST'])
+@app.route('/greendeck/task', methods=['POST'])
 def get_tasks():
     return get_tasks_answer(request)
 
