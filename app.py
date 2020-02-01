@@ -45,7 +45,7 @@ def get_query_type2(filters):
     ans = pd.DataFrame()
     for filter in filters:
         ans = apply_filters(ans,filter)
-    return jsonify({'discounted_products_count': int(ans.discounts.count()) ,'avg_discount': float(ans.discounts.mean())})
+    return jsonify({'discounted_products_count': int(ans.discounts.count()) ,'avg_discount': round(float(ans.discounts.mean()),2)})
 
 
 def get_tasks_answer(request):
