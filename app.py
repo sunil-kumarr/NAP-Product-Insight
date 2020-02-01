@@ -14,7 +14,7 @@ url = 'https://drive.google.com/a/greendeck.co/uc?id=19r_vn0vuvHpE-rJpFHvXHlMvxa
 
 app = Flask(__name__)
 CORS(app)
-path = 'dumps/netaporter_gb.json'
+path = 'netaporter_gb_similar.json'
 
 
 def init_files(dump_path):
@@ -27,22 +27,22 @@ def init_files(dump_path):
 
 
 product_json = []
-df = pd.DataFrame()
+df = None
 #  load file in memory
 
 
-def prepare_dataset(path):
-    global df
-    with open(path) as fp:
-        for product in fp.readlines():
-            product_json.append(json.loads(product))
-    df = pd.json_normalize(product_json)
+# def prepare_dataset(path):
+#     global df
+with open(path) as fp:
+    for product in fp.readlines():
+        product_json.append(json.loads(product))
+df = pd.json_normalize(product_json)
 
 
 def get_discounts(discount_val):
     df['discounts'] = (df['price.regular_price.value']-df['price.offer_price.value'])/100.0
     ans = df[df['discounts'] > discount_val]
-    return ans['_id.$oid'].to_list()
+    return df['_id.$oid'].to_list()
 
 
 @app.route("/greendeck/total/", methods=['GET'])
@@ -56,6 +56,6 @@ def get_tasks():
 
 
 if __name__ == '__main__':
-    init_files(path)
-    prepare_dataset(path)
+    init_files('dumps/netaporter_gb.json')
+    # prepare_dataset(path)
     app.run(debug=True, host='0.0.0.0', port=5000)
