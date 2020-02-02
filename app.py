@@ -78,13 +78,37 @@ def get_similar_items(web_col,nap_frame):
    
 
 def get_query_type3(filters):
-
     temp_dataframe = filter_dataframe(filters)
     expen_col = "similar_products.website_results."
     col = []
     for web_id in WEBSITE_ID_HASH.values():
         col.append(expen_col+web_id+".knn_items")
     return get_similar_items(col,temp_dataframe)
+
+def get_discount_diff(com_col,nap_frame,discount_diff):
+    ids = []
+    for index,row in nap_frame.iterrows():
+        discount_nap = row['discounts']
+        for product in row[com_col]:
+            reg_price = product['_source']['price']['regular_price']['value']
+            off_price = product['_source']['price']['offer_price']['value']
+            discount_comp = ((reg_price-off_price)/reg_price)*100.0
+            if discount_nap - discount_comp > discount_diff:
+                ids.append(row['_id.$oid'])
+    return jsonify({"competition_discount_diff_list":ids})
+
+def get_query_type4(filters):
+    temp_dataframe = filter_dataframe(filters)
+    expen_col = "similar_products.website_results."
+    comp_col = ''
+    discount_diff = 0
+    for filter in filters:
+        if filter['operand1'] == 'competition':
+            comp_col = expen_col+filter['operand2']+".knn_items"
+            break
+        if filter['operand1'] == 'discount_diff':
+            discount_diff = filter['operand2']
+    return get_discount_diff(comp_col,temp_dataframe,discount_diff)
 
 
 def get_tasks_answer(request):
@@ -99,8 +123,8 @@ def get_tasks_answer(request):
             return get_query_type3([])
          else :
              return get_query_type3(request.json['filters'])
-    # elif request.query_type == 'competition_discount_diff_list':
-    #      return get_query_type4(request.filters)
+    elif request.json["query_type"] == 'competition_discount_diff_list':
+         return get_query_type4(request.json["filters"])
     return jsonify({'error':'invalid post request'})
 
 
