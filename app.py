@@ -46,34 +46,34 @@ def filter_dataframe(filters):
         temp_nap_dataframe = apply_filters(temp_nap_dataframe,filter)
     return temp_nap_dataframe
 
-# competitors website hash_id dict 
+# competitors website hash_id dict
 WEBSITE_ID_HASH = {
  "farfetch_gb"       : "5d0cc7b68a66a100014acdb0" ,
  "mytheresa_gb"      : "5da94e940ffeca000172b12a" ,
  "matchesfashion_gb" : "5da94ef80ffeca000172b12c" ,
  "ssense_gb"         : "5da94f270ffeca000172b12e" ,
- "selfridges_gb"     : "5da94f4e6d97010001f81d72" 
+ "selfridges_gb"     : "5da94f4e6d97010001f81d72"
 }
 
 # helper function to get nap_product_list who's basket_price < nap_basket_price
 def get_similar_items(comp_col_list,nap_frame):
     nap_product_ids = []
     #loop through each nap_dataframe row
-    for index,row in nap_frame.iterrows(): 
+    for index,row in nap_frame.iterrows():
          # basket_price for each row of NAP product
         basket_price_nap = row['price.basket_price.value']
          # loop through each competitor in websites column
         for comp_col in comp_col_list:
-                 # loop for each similar product 
+                 # loop for each similar product
                 for sim_product in row[comp_col]:
                     # get the basket price for similiar product
                      basket_price_comp = sim_product['_source']['price']['basket_price']['value']
                      if basket_price_comp < basket_price_nap:
                          nap_product_ids.append(row['_id.$oid'])
-                         break 
-    return nap_product_ids       
+                         break
+    return nap_product_ids
 
-# helper fucntion to get product_id having discount > n% from competitor X 
+# helper fucntion to get product_id having discount > n% from competitor X
 # (Assuming competition filter is singular in filters i.e. comparision is only with one competition website)
 def get_discount_diff(com_col,nap_frame,discount_diff):
     nap_product_ids = []
@@ -94,14 +94,14 @@ def get_discount_diff(com_col,nap_frame,discount_diff):
                 nap_product_ids.append(row['_id.$oid'])
     return nap_product_ids
 
-# (QUESTION 1)  
+# (QUESTION 1)
 def get_query_type1(filters):
     # apply filters on dataframe
     ans = filter_dataframe(filters)
     # return the IDs based on filters
     return jsonify({'discounted_products_list': ans['_id.$oid'].to_list()})
 
-# (QUESTION 2) 
+# (QUESTION 2)
 def get_query_type2(filters):
     # apply filters on dataframe
     ans = filter_dataframe(filters)
@@ -114,26 +114,26 @@ def get_query_type3(filters):
     temp_dataframe = filter_dataframe(filters)
     expen_col = "similar_products.website_results."
     col = []
-    # creating column names from website_hash_id 
+    # creating column names from website_hash_id
     for web_id in WEBSITE_ID_HASH.values():
         col.append(expen_col+web_id+".knn_items")
     # calling helper function to get nap_product_ids where they are selling at a price higher than any of the competition.
     nap_product_ids = get_similar_items(col,temp_dataframe)
     # return the IDs based on filters
-    return jsonify({'epensive_list':nap_product_ids}) 
+    return jsonify({'epensive_list':nap_product_ids})
 
 # (QUESTION 4)
 def get_query_type4(filters):
-    # apply filers on dataframe if any 
+    # apply filers on dataframe if any
     temp_dataframe = filter_dataframe(filters)
     expen_col = "similar_products.website_results."
     comp_col = ''
     discount_diff = 0
-    # loop over specific filters 
+    # loop over specific filters
     for filter in filters:
         # (assuming only one filter of this type)
         if filter['operand1'] == 'competition':
-            # creating column_name for competitor X 
+            # creating column_name for competitor X
             comp_col = expen_col+filter['operand2']+".knn_items"
         # get the discount_diff asked in query
         if filter['operand1'] == 'discount_diff':
@@ -145,7 +145,7 @@ def get_query_type4(filters):
 
 # function to identify different QUERY_TYPE
 def get_tasks_answer(request):
-    if not request.json : 
+    if not request.json :
         abort(400)
     # query type = 1
     if request.json['query_type'] == 'discounted_products_list':
@@ -187,21 +187,21 @@ def get_tasks():
 # QUERY_TYPE = 1 : function to handle incoming POST request
 @app.route('/greendeck/question1', methods=['POST'])
 def get_task1():
-    if not request.json : 
+    if not request.json :
         abort(400)
     return get_query_type1(request.json['filters'])
 
 # QUERY_TYPE = 2 : function to handle incoming POST request
 @app.route('/greendeck/question2', methods=['POST'])
 def get_task2():
-    if not request.json : 
+    if not request.json :
         abort(400)
     return get_query_type2(request.json['filters'])
 
 # QUERY_TYPE = 3 : function to handle incoming POST request
 @app.route('/greendeck/question3', methods=['POST'])
 def get_task3():
-    if not request.json : 
+    if not request.json :
         abort(400)
     if not 'filters' in request.json:
          return get_query_type3([])
@@ -211,10 +211,10 @@ def get_task3():
 # QUERY_TYPE = 4 : function to handle incoming POST request
 @app.route('/greendeck/question4', methods=['POST'])
 def get_task4():
-    if not request.json : 
+    if not request.json :
         abort(400)
     return get_query_type4(request.json['filters'])
-    
+
 # start app
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
