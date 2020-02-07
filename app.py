@@ -1,12 +1,8 @@
 
 import json
-import ijson
 import pandas as pd
 import io
 import os
-import gdown
-from functools import partial
-from flask_cors import CORS
 from flask import Flask, jsonify, abort, request, make_response
 
 
@@ -225,7 +221,7 @@ def get_task4():
 
 @app.route('/')
 def index():
-    return "<h1>Welcome to our server !!</h1>"
+    return "<h1>Greendeck Data Science Assignment :-) !!</h1>"
 
 # start app
 if __name__ == '__main__':
