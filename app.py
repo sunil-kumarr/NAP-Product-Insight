@@ -181,31 +181,31 @@ def server_error(error):
     return make_response(jsonify({'error': 'Server failed'}), 500)
 
 # Test Function : to get columns in created dataframe
-@app.route("/greendeck/columns/",methods=['GET'])
+@app.route("/columns/",methods=['GET'])
 def get_columns():
     return jsonify({"columns":nap_dataframe.columns.to_list()})
 
 # QUERY_TYPE = ANY : function to handle incoming POST request for all type query
-@app.route('/greendeck/task', methods=['POST'])
+@app.route('/task', methods=['POST'])
 def get_tasks():
     return get_tasks_answer(request)
 
 # QUERY_TYPE = 1 : function to handle incoming POST request
-@app.route('/greendeck/question1', methods=['POST'])
+@app.route('/question1', methods=['POST'])
 def get_task1():
     if not request.json :
         abort(400)
     return get_query_type1(request.json['filters'])
 
 # QUERY_TYPE = 2 : function to handle incoming POST request
-@app.route('/greendeck/question2', methods=['POST'])
+@app.route('/question2', methods=['POST'])
 def get_task2():
     if not request.json :
         abort(400)
     return get_query_type2(request.json['filters'])
 
 # QUERY_TYPE = 3 : function to handle incoming POST request
-@app.route('/greendeck/question3', methods=['POST'])
+@app.route('/question3', methods=['POST'])
 def get_task3():
     if not request.json :
         abort(400)
@@ -215,11 +215,15 @@ def get_task3():
          return get_query_type3(request.json['filters'])
 
 # QUERY_TYPE = 4 : function to handle incoming POST request
-@app.route('/greendeck/question4', methods=['POST'])
+@app.route('/question4', methods=['POST'])
 def get_task4():
     if not request.json :
         abort(400)
     return get_query_type4(request.json['filters'])
+
+@app.route('/')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
 
 # start app
 if __name__ == '__main__':
