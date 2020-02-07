@@ -42,19 +42,19 @@ def apply_filters(temp_nap_dataframe,filter):
     # TYPE 1 Filter: discount [<,>,==] val
     if filter['operand1'] == 'discount':
         if filter["operator"] == '<':
-            temp_nap_dataframe = nap_dataframe[nap_dataframe['discounts'] < filter["operand2"]]
+            temp_nap_dataframe = temp_nap_dataframe[temp_nap_dataframe['discounts'] < filter["operand2"]]
         elif filter["operator"] == '>':
-            temp_nap_dataframe = nap_dataframe[nap_dataframe['discounts'] > filter["operand2"]]
+            temp_nap_dataframe = temp_nap_dataframe[temp_nap_dataframe['discounts'] > filter["operand2"]]
         else:
-             temp_nap_dataframe = nap_dataframe[nap_dataframe['discounts'] == filter["operand2"]]
+             temp_nap_dataframe = temp_nap_dataframe[temp_nap_dataframe['discounts'] == filter["operand2"]]
     # TYPE 2 Filter: brand.name [==] 'gucci or ....'
     elif filter["operand1"] == 'brand.name':
-             temp_nap_dataframe = nap_dataframe[nap_dataframe['brand.name'] == filter["operand2"]]
+             temp_nap_dataframe = temp_nap_dataframe[temp_nap_dataframe['brand.name'] == filter["operand2"]]
     return temp_nap_dataframe
 
 # util function to apply different filters on dataframe using apply_filters function
 def filter_dataframe(filters):
-    temp_nap_dataframe = nap_dataframe
+    temp_nap_dataframe = nap_dataframe.copy()
     for filter in filters:
         temp_nap_dataframe = apply_filters(temp_nap_dataframe,filter)
     return temp_nap_dataframe
