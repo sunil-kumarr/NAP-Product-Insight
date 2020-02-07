@@ -33,9 +33,16 @@
    Type 1: `http://127.0.0.1:5000/greendeck/question1` (just change the question number and filters)  
    Type 2: `http://127.0.0.1:5000/greendeck/task` (just change the filters and hit ,the program will automatically call the required fucntion based on the query_type param in the json)  
    For the rest of approach look at the code as I have added detailed comments before a line of code wherever neccesary.  
+## HEROKU API
 
-## API Endpoints  
+  - `https://greenapi.herokuapp.com/task`
+  - `https://greenapi.herokuapp.com/question1`
+  - `https://greenapi.herokuapp.com/question2`
+  - `https://greenapi.herokuapp.com/question3`
+  - `https://greenapi.herokuapp.com/question4`
+  - `https://greenapi.herokuapp.com/columns`
 
+## API Endpoints (Local)
   - **GET Request**    `http://127.0.0.1:5000/greendeck/columns`  
     > This will return all the columns in the DataFrame used in this program.  
 
@@ -61,6 +68,3 @@
   - **Type All Query**  
     **POST Request**   `http://127.0.0.1:5000/greendeck/task`  
     > This is a all in one url endpoint which can be used in place of any of the 4 Post requests used above and return the same output.
-
-**Note**: I Tried to host the application on **Heroku** but there was a dependency error for `libgirepository1.0-pc`.
-          To resolve the error I searched around on internet a lot but nothing solved it ,I also posted it on stackoverflow but haven't gotten any answer to it yet.
