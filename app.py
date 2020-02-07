@@ -26,7 +26,7 @@ col = []
 product_json = []
 for web_id in WEBSITE_ID_HASH.values():
     col.append(expen_col+web_id+".knn_items")
-old_columns = ['_id.$oid','brand.name','price.regular_price.value','price.offer_price.value']+col
+old_columns = ['_id.$oid','brand.name','price.regular_price.value','price.offer_price.value','price.basket_price.value']+col
 global nap_dataframe 
 with open(path,'r') as fp:
     for product in fp.readlines():
