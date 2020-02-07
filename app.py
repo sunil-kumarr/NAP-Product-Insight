@@ -1,5 +1,6 @@
 
 import json
+import ijson
 import pandas as pd
 import io
 import os
@@ -11,15 +12,34 @@ from flask import Flask, jsonify, abort, request, make_response
 
 app = Flask(__name__)
 
-product_json = []
+# competitors website hash_id dict
+WEBSITE_ID_HASH = {
+ "farfetch_gb"       : "5d0cc7b68a66a100014acdb0" ,
+ "mytheresa_gb"      : "5da94e940ffeca000172b12a" ,
+ "matchesfashion_gb" : "5da94ef80ffeca000172b12c" ,
+ "ssense_gb"         : "5da94f270ffeca000172b12e" ,
+ "selfridges_gb"     : "5da94f4e6d97010001f81d72"
+}
 path = "netaporter_gb_similar.json"
-with open(path) as fp:
+expen_col = "similar_products.website_results."
+col = []
+product_json = []
+for web_id in WEBSITE_ID_HASH.values():
+    col.append(expen_col+web_id+".knn_items")
+old_columns = ['_id.$oid','brand.name','price.regular_price.value','price.offer_price.value']+col
+global nap_dataframe 
+with open(path,'r') as fp:
     for product in fp.readlines():
         product_json.append(json.loads(product))
-# normalize the deeply nested json to flat structure dataframe from product_json list
-nap_dataframe = pd.json_normalize(product_json)
-# new "discounts" column is created from regular and offer price of NAP productss
+df = pd.json_normalize(product_json)
+nap_dataframe = df.loc[:,old_columns]
 nap_dataframe['discounts'] = ((nap_dataframe['price.regular_price.value'] - nap_dataframe['price.offer_price.value'])/nap_dataframe['price.regular_price.value'])*100
+product_json = None
+df = None
+
+# normalize the deeply nested json to flat structure dataframe from product_json list
+
+# new "discounts" column is created from regular and offer price of NAP productss
 
 # apply single filter from POST request on the dataframe here
 def apply_filters(temp_nap_dataframe,filter):
@@ -42,15 +62,6 @@ def filter_dataframe(filters):
     for filter in filters:
         temp_nap_dataframe = apply_filters(temp_nap_dataframe,filter)
     return temp_nap_dataframe
-
-# competitors website hash_id dict
-WEBSITE_ID_HASH = {
- "farfetch_gb"       : "5d0cc7b68a66a100014acdb0" ,
- "mytheresa_gb"      : "5da94e940ffeca000172b12a" ,
- "matchesfashion_gb" : "5da94ef80ffeca000172b12c" ,
- "ssense_gb"         : "5da94f270ffeca000172b12e" ,
- "selfridges_gb"     : "5da94f4e6d97010001f81d72"
-}
 
 # helper function to get nap_product_list who's basket_price < nap_basket_price
 def get_similar_items(comp_col_list,nap_frame):
@@ -218,4 +229,5 @@ def index():
 
 # start app
 if __name__ == '__main__':
+    
     app.run(debug=True, host='0.0.0.0', port=5000)
