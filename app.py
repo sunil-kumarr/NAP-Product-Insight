@@ -8,21 +8,27 @@ from functools import partial
 from flask_cors import CORS
 from flask import Flask, jsonify, abort, request, make_response
 
-
+url = 'https://drive.google.com/a/greendeck.co/uc?id=19r_vn0vuvHpE-rJpFHvXHlMvxa8UOeom&export=download'
 app = Flask(__name__)
+CORS(app)
 
-# load the json file into a list
-product_json = []
-path = 'netaporter_gb_similar.json'
-with open(path) as fp:
-    for product in fp.readlines():
-        product_json.append(json.loads(product))
 
-# normalize the deeply nested json to flat structure dataframe from product_json list
-nap_dataframe = pd.json_normalize(product_json)
-
-# new "discounts" column is created from regular and offer price of NAP productss
-nap_dataframe['discounts'] = ((nap_dataframe['price.regular_price.value'] - nap_dataframe['price.offer_price.value'])/nap_dataframe['price.regular_price.value'])*100
+def init_files(dump_path = 'dumps/netaporter_gb.json'):
+    if dump_path.split('/')[0] not in os.listdir():
+        os.mkdir(dump_path.split('/')[0])
+    if os.path.exists(dump_path):
+        pass
+    else:
+        gdown.download(url = url, output = dump_path, quiet=False)
+def prepare_dataset(path = 'dumps/netaporter_gb.json'):
+    product_json = []
+    with open(path) as fp:
+        for product in fp.readlines():
+            product_json.append(json.loads(product))
+    # normalize the deeply nested json to flat structure dataframe from product_json list
+    nap_dataframe = pd.json_normalize(product_json)
+    # new "discounts" column is created from regular and offer price of NAP productss
+    nap_dataframe['discounts'] = ((nap_dataframe['price.regular_price.value'] - nap_dataframe['price.offer_price.value'])/nap_dataframe['price.regular_price.value'])*100
 
 # apply single filter from POST request on the dataframe here
 def apply_filters(temp_nap_dataframe,filter):
@@ -217,4 +223,8 @@ def get_task4():
 
 # start app
 if __name__ == '__main__':
+     # GETTING DATASET this function will download the dataset
+    init_files('dumps/netaporter_gb.json')
+    # PREPARING DATASET
+    prepare_dataset('dumps/netaporter_gb.json')
     app.run(debug=True, host='0.0.0.0', port=5000)
